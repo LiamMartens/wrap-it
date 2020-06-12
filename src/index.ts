@@ -17,6 +17,7 @@ export function fit(
 ) {
   let width = 0;
   let index = 0;
+  let needsBreak = false;
   let lastMbCharIndex = -1;
   let lastBaCharIndex = -1;
   let lastBbCharIndex = -1;
@@ -34,13 +35,15 @@ export function fit(
     if (MandatoryBreakCharacters.includes(char)) { lastMbCharIndex = index; break; }
     // update size
     const nextWidth = width + charWidth;
-    if (nextWidth < maxWidth) width = nextWidth;
-    else break;
+    if (maxWidth <= 0 || nextWidth < maxWidth) { width = nextWidth; }
+    else { needsBreak = true; break; }
     index++;
   }
-  if (lastMbCharIndex > -1) return { start, width, length: lastMbCharIndex };
-  if (lastBaCharIndex > 0 && lastBaCharIndex > lastBbCharIndex) return { start, width: widthOnLastBaChar, length: lastBaCharIndex + 1, };
-  if (lastBbCharIndex > 0 && lastBbCharIndex > lastBaCharIndex) return { start, width: widthOnLastBbChar, length: lastBbCharIndex };
+  if (needsBreak) {
+    if (lastMbCharIndex > -1) return { start, width, length: lastMbCharIndex };
+    if (lastBaCharIndex > 0 && lastBaCharIndex > lastBbCharIndex) return { start, width: widthOnLastBaChar, length: lastBaCharIndex + 1, };
+    if (lastBbCharIndex > 0 && lastBbCharIndex > lastBaCharIndex) return { start, width: widthOnLastBbChar, length: lastBbCharIndex };
+  }
   return {
     start,
     width,
