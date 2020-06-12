@@ -20,14 +20,16 @@ export function fit(
   let lastMbCharIndex = -1;
   let lastBaCharIndex = -1;
   let lastBbCharIndex = -1;
+  let widthOnLastBaChar = 0;
+  let widthOnLastBbChar = 0;
   const len = text.length - start;
   while (index < len) {
     const charIndex = start + index;
     const charWidth = measure(text, charIndex, index);
     const char = text[charIndex];
     // save last break after and before chars
-    if (BreakAfterCharacters.includes(char)) { lastBaCharIndex = index; }
-    if (BreakBeforeCharacters.includes(char)) { lastBbCharIndex = index; }
+    if (BreakAfterCharacters.includes(char)) { widthOnLastBaChar = width + charWidth; lastBaCharIndex = index; }
+    if (BreakBeforeCharacters.includes(char)) { widthOnLastBbChar = width; lastBbCharIndex = index; }
     // always end on newlines
     if (MandatoryBreakCharacters.includes(char)) { lastMbCharIndex = index; break; }
     // update size
@@ -36,11 +38,12 @@ export function fit(
     else break;
     index++;
   }
-  if (lastMbCharIndex > -1) return { start, length: lastMbCharIndex };
-  if (lastBaCharIndex > 0 && lastBaCharIndex > lastBbCharIndex) return { start, length: lastBaCharIndex, };
-  if (lastBbCharIndex > 0 && lastBbCharIndex > lastBaCharIndex) return { start, length: lastBbCharIndex - 1 };
+  if (lastMbCharIndex > -1) return { start, width, length: lastMbCharIndex };
+  if (lastBaCharIndex > 0 && lastBaCharIndex > lastBbCharIndex) return { start, width: widthOnLastBaChar, length: lastBaCharIndex + 1, };
+  if (lastBbCharIndex > 0 && lastBbCharIndex > lastBaCharIndex) return { start, width: widthOnLastBbChar, length: lastBbCharIndex };
   return {
     start,
+    width,
     length: index,
   };
 }
@@ -50,18 +53,30 @@ export function wrap(
   maxWidth: number,
   measure: (text: string, charIndex: number, localIndex: number) => number,
 ) {
+  const leadingSpaceRx = /^([\s\uFEFF\xA0]+)/;
+  const trailingSpaceRx = /([\s\uFEFF\xA0]+)$/;
+
   let indexOffset = 0;
   const lines: string[] = [];
-  const ranges: ReturnType<typeof fit>[] = [];
+  const ranges: { start: number; length: number; }[] = [];
+  const sizes: number[] = [];
   while (indexOffset < text.length) {
-    const { start, length } = fit(text, indexOffset, maxWidth, measure);
+    const { start, length, width } = fit(text, indexOffset, maxWidth, measure);
     let str = text.substr(start, length);
+    let leadingSpaceWidth = 0;
+    let trailingSpaceWidth = 0;
+    const leadingSpaces = Array.from(str.match(leadingSpaceRx)?.[0] || '');
+    leadingSpaces.forEach((space, index) => { leadingSpaceWidth += measure(text, start + index, index); });
+    const trailingSpaces = Array.from(str.replace(leadingSpaceRx, '').match(trailingSpaceRx)?.[0] || '');
+    trailingSpaces.forEach((space, index) => { trailingSpaceWidth += measure(text, start + str.length - trailingSpaces.length + index, index); });
     lines.push(str.trim());
     ranges.push({ start, length });
+    sizes.push(width - leadingSpaceWidth - trailingSpaceWidth);
     indexOffset += str.length;
   }
   return {
     lines,
     ranges,
+    sizes,
   };
 }
