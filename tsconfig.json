@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "outDir": "./lib",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "target": "es2015",
+    "lib": [
+      "ES2015",
+      "ESNEXT"
+    ],
+    "declaration": true
+  },
+  "include": [
+    "./src"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
