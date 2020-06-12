@@ -62,7 +62,7 @@ export function wrap(
   let indexOffset = 0;
   const lines: string[] = [];
   const ranges: { start: number; length: number; }[] = [];
-  const sizes: number[] = [];
+  const sizes: { total: number; leading: number; trailing: number; }[] = [];
   while (indexOffset < text.length) {
     const { start, length, width } = fit(text, indexOffset, maxWidth, measure);
     let str = text.substr(start, length);
@@ -72,9 +72,13 @@ export function wrap(
     leadingSpaces.forEach((space, index) => { leadingSpaceWidth += measure(text, start + index, index); });
     const trailingSpaces = Array.from(str.replace(leadingSpaceRx, '').match(trailingSpaceRx)?.[0] || '');
     trailingSpaces.forEach((space, index) => { trailingSpaceWidth += measure(text, start + str.length - trailingSpaces.length + index, index); });
-    lines.push(str.trim());
+    lines.push(str);
     ranges.push({ start, length });
-    sizes.push(width - leadingSpaceWidth - trailingSpaceWidth);
+    sizes.push({
+      total: width,
+      leading: leadingSpaceWidth,
+      trailing: trailingSpaceWidth,
+    });
     indexOffset += str.length;
   }
   return {
