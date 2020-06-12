@@ -13,8 +13,7 @@ export function fit(
   text: string,
   start: number,
   maxWidth: number,
-  letterSpacing: number,
-  measure: (text: string, charIndex: number) => number,
+  measure: (text: string, charIndex: number, localIndex: number) => number,
 ) {
   let width = 0;
   let index = 0;
@@ -24,7 +23,7 @@ export function fit(
   const len = text.length - start;
   while (index < len) {
     const charIndex = start + index;
-    const charWidth = measure(text, charIndex);
+    const charWidth = measure(text, charIndex, index);
     const char = text[charIndex];
     // save last break after and before chars
     if (BreakAfterCharacters.includes(char)) { lastBaCharIndex = index; }
@@ -32,7 +31,7 @@ export function fit(
     // always end on newlines
     if (MandatoryBreakCharacters.includes(char)) { lastMbCharIndex = index; break; }
     // update size
-    const nextWidth = (index > 0 ? letterSpacing : 0) + width + charWidth;
+    const nextWidth = width + charWidth;
     if (nextWidth < maxWidth) width = nextWidth;
     else break;
     index++;
@@ -49,14 +48,13 @@ export function fit(
 export function wrap(
   text: string,
   maxWidth: number,
-  letterSpacing: number,
-  measure: (text: string, charIndex: number) => number,
+  measure: (text: string, charIndex: number, localIndex: number) => number,
 ) {
   let indexOffset = 0;
   const lines: string[] = [];
   const ranges: ReturnType<typeof fit>[] = [];
   while (indexOffset < text.length) {
-    const { start, length } = fit(text, indexOffset, maxWidth, letterSpacing, measure);
+    const { start, length } = fit(text, indexOffset, maxWidth, measure);
     let str = text.substr(start, length);
     lines.push(str.trim());
     ranges.push({ start, length });
