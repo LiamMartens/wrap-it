@@ -21,6 +21,7 @@ export function fit(
   let lastMbCharIndex = -1;
   let lastBaCharIndex = -1;
   let lastBbCharIndex = -1;
+  let lastCharWidth = 0;
   let widthOnLastBaChar = 0;
   let widthOnLastBbChar = 0;
   const len = text.length - start;
@@ -28,6 +29,7 @@ export function fit(
     const charIndex = start + index;
     const charWidth = measure(text, charIndex, index);
     const char = text[charIndex];
+    lastCharWidth = charWidth;
     // save last break after and before chars
     if (BreakAfterCharacters.includes(char)) { widthOnLastBaChar = width + charWidth; lastBaCharIndex = index; }
     if (BreakBeforeCharacters.includes(char)) { widthOnLastBbChar = width; lastBbCharIndex = index; }
@@ -43,6 +45,7 @@ export function fit(
     if (lastMbCharIndex > -1) return { start, width, length: lastMbCharIndex };
     if (lastBaCharIndex > 0 && lastBaCharIndex > lastBbCharIndex) return { start, width: widthOnLastBaChar, length: lastBaCharIndex + 1, };
     if (lastBbCharIndex > 0 && lastBbCharIndex > lastBaCharIndex) return { start, width: widthOnLastBbChar, length: lastBbCharIndex };
+    else return { start, width: lastCharWidth, length: 1 }
   }
   return {
     start,
