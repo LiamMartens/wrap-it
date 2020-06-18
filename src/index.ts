@@ -45,7 +45,7 @@ export function fit(
     if (lastMbCharIndex > -1) return { start, width, length: lastMbCharIndex };
     if (lastBaCharIndex > 0 && lastBaCharIndex > lastBbCharIndex) return { start, width: widthOnLastBaChar, length: lastBaCharIndex + 1, };
     if (lastBbCharIndex > 0 && lastBbCharIndex > lastBaCharIndex) return { start, width: widthOnLastBbChar, length: lastBbCharIndex };
-    else return { start, width: lastCharWidth, length: 1 }
+    else if (lastCharWidth >= maxWidth + 0.5) return { start, width: lastCharWidth, length: 1 }
   }
   return {
     start,
