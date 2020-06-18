@@ -37,7 +37,7 @@ export function fit(
     if (MandatoryBreakCharacters.includes(char)) { lastMbCharIndex = index; break; }
     // update size
     const nextWidth = width + charWidth;
-    if (maxWidth <= 0 || nextWidth < maxWidth) { width = nextWidth; }
+    if (maxWidth <= 0 || nextWidth < maxWidth + 0.5) { width = nextWidth; }
     else { needsBreak = true; break; }
     index++;
   }
