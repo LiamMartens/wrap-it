@@ -34,7 +34,7 @@ export function fit(
     if (BreakAfterCharacters.includes(char)) { widthOnLastBaChar = width + charWidth; lastBaCharIndex = index; }
     if (BreakBeforeCharacters.includes(char)) { widthOnLastBbChar = width; lastBbCharIndex = index; }
     // always end on newlines
-    if (MandatoryBreakCharacters.includes(char)) { lastMbCharIndex = index; break; }
+    if (MandatoryBreakCharacters.includes(char)) { lastMbCharIndex = index; needsBreak = true; break; }
     // update size
     const nextWidth = width + charWidth;
     if (maxWidth <= 0 || nextWidth < maxWidth + 0.5) { width = nextWidth; }
@@ -42,7 +42,7 @@ export function fit(
     index++;
   }
   if (needsBreak) {
-    if (lastMbCharIndex > -1) return { start, width, length: lastMbCharIndex };
+    if (lastMbCharIndex > -1) return { start, width, length: lastMbCharIndex + 1 };
     if (lastBaCharIndex > 0 && lastBaCharIndex > lastBbCharIndex) return { start, width: widthOnLastBaChar, length: lastBaCharIndex + 1, };
     if (lastBbCharIndex > 0 && lastBbCharIndex > lastBaCharIndex) return { start, width: widthOnLastBbChar, length: lastBbCharIndex };
     else if (lastCharWidth >= maxWidth + 0.5) return { start, width: lastCharWidth, length: 1 }
